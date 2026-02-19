@@ -3,6 +3,25 @@ import { io } from 'socket.io-client';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
+// Theme store
+export const useThemeStore = create((set, get) => ({
+  theme: localStorage.getItem('theme') || 'dark',
+  
+  toggleTheme: () => {
+    const newTheme = get().theme === 'dark' ? 'light' : 'dark';
+    localStorage.setItem('theme', newTheme);
+    document.documentElement.classList.remove('dark', 'light');
+    document.documentElement.classList.add(newTheme);
+    set({ theme: newTheme });
+  },
+  
+  initTheme: () => {
+    const theme = get().theme;
+    document.documentElement.classList.remove('dark', 'light');
+    document.documentElement.classList.add(theme);
+  },
+}));
+
 // Socket store
 export const useSocketStore = create((set, get) => ({
   socket: null,

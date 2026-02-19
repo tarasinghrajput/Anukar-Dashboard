@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
@@ -9,6 +10,8 @@ import {
   BookOpen,
   Settings 
 } from 'lucide-react';
+import ThemeToggle from './ThemeToggle';
+import { useThemeStore } from '../store';
 
 const navItems = [
   { path: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -23,18 +26,34 @@ const navItems = [
 
 export default function Sidebar({ health }) {
   const location = useLocation();
+  const { initTheme, theme } = useThemeStore();
+  
+  useEffect(() => {
+    initTheme();
+  }, []);
+  
+  const isDark = theme === 'dark';
   
   return (
-    <aside className="w-64 flex flex-col border-r border-slate-800 bg-[#111418] shrink-0 h-full overflow-y-auto">
+    <aside className={`w-64 flex flex-col border-r shrink-0 h-full overflow-y-auto ${
+      isDark ? 'border-slate-800 bg-[#111418]' : 'border-slate-200 bg-white'
+    }`}>
       {/* Logo */}
-      <div className="p-4 flex items-center gap-3 border-b border-slate-800">
-        <div className="size-8 rounded bg-primary flex items-center justify-center">
-          <span className="text-white text-xl font-bold">A</span>
+      <div className={`p-4 flex items-center justify-between border-b ${
+        isDark ? 'border-slate-800' : 'border-slate-200'
+      }`}>
+        <div className="flex items-center gap-3">
+          <div className="size-8 rounded bg-primary flex items-center justify-center">
+            <span className="text-white text-xl font-bold">A</span>
+          </div>
+          <div className="flex flex-col">
+            <span className={`font-bold tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
+              ANUKAR CORE
+            </span>
+            <span className="text-xs text-slate-400">v1.0.0</span>
+          </div>
         </div>
-        <div className="flex flex-col">
-          <span className="text-white font-bold tracking-tight">ANUKAR CORE</span>
-          <span className="text-xs text-slate-400">v1.0.0</span>
-        </div>
+        <ThemeToggle />
       </div>
       
       {/* Navigation */}
@@ -50,8 +69,12 @@ export default function Sidebar({ health }) {
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors group ${
                 isActive
-                  ? 'bg-primary/20 text-primary border border-primary/20'
-                  : 'text-slate-400 hover:bg-surface-dark hover:text-white'
+                  ? isDark 
+                    ? 'bg-primary/20 text-primary border border-primary/20'
+                    : 'bg-primary/10 text-primary border border-primary/20'
+                  : isDark
+                    ? 'text-slate-400 hover:bg-surface-dark hover:text-white'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
               }`
             }
           >
@@ -71,8 +94,12 @@ export default function Sidebar({ health }) {
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2 rounded-lg transition-colors group ${
                 isActive
-                  ? 'bg-primary/20 text-primary border border-primary/20'
-                  : 'text-slate-400 hover:bg-surface-dark hover:text-white'
+                  ? isDark 
+                    ? 'bg-primary/20 text-primary border border-primary/20'
+                    : 'bg-primary/10 text-primary border border-primary/20'
+                  : isDark
+                    ? 'text-slate-400 hover:bg-surface-dark hover:text-white'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
               }`
             }
           >
@@ -83,13 +110,17 @@ export default function Sidebar({ health }) {
       </nav>
       
       {/* System Status */}
-      <div className="p-4 border-t border-slate-800 bg-[#0e1216]">
+      <div className={`p-4 border-t ${
+        isDark ? 'border-slate-800 bg-[#0e1216]' : 'border-slate-200 bg-slate-50'
+      }`}>
         <div className="flex items-center gap-3 mb-4">
           <div className="size-8 rounded-full bg-gradient-to-br from-primary to-accent-cyan flex items-center justify-center">
             <span className="text-white text-sm font-bold">TS</span>
           </div>
           <div className="flex flex-col">
-            <span className="text-sm font-medium text-white">Tara Singh</span>
+            <span className={`text-sm font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>
+              Tara Singh
+            </span>
             <span className="text-xs text-slate-400">Admin</span>
           </div>
         </div>
@@ -101,7 +132,9 @@ export default function Sidebar({ health }) {
                 <span>Active Tasks</span>
                 <span className="text-accent-cyan">{health.tasks?.active || 0}</span>
               </div>
-              <div className="h-1 w-full bg-slate-800 rounded-full overflow-hidden">
+              <div className={`h-1 w-full rounded-full overflow-hidden ${
+                isDark ? 'bg-slate-800' : 'bg-slate-200'
+              }`}>
                 <div 
                   className="h-full bg-accent-cyan transition-all"
                   style={{ width: `${Math.min(health.tasks?.active / 10 * 100 || 0, 100)}%` }}
@@ -114,7 +147,9 @@ export default function Sidebar({ health }) {
                 <span>Agent Load</span>
                 <span className="text-accent-amber">{health.agents?.avgLoad || 0}%</span>
               </div>
-              <div className="h-1 w-full bg-slate-800 rounded-full overflow-hidden">
+              <div className={`h-1 w-full rounded-full overflow-hidden ${
+                isDark ? 'bg-slate-800' : 'bg-slate-200'
+              }`}>
                 <div 
                   className="h-full bg-accent-amber transition-all"
                   style={{ width: `${health.agents?.avgLoad || 0}%` }}
