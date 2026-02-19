@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Anukar Task Orchestration Kanban</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        /* Custom scrollbar for horizontal scrolling of columns */
+        .kanban-container::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .kanban-container::-webkit-scrollbar-track {
+            background: #1e293b;
+            border-radius: 4px;
+        }
+
+        .kanban-container::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+
+        .kanban-container::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+    </style>
+</head>
+
+<body
+    class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white h-screen flex flex-col overflow-hidden">
+    <!-- Header Section -->
+    <header class="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#111418] shrink-0">
+        <div class="px-6 py-4">
+            <!-- Breadcrumbs -->
+            <div class="flex items-center gap-2 mb-4">
+                <a class="text-slate-500 dark:text-[#9dabb9] text-sm font-medium hover:text-primary transition-colors"
+                    href="#">Anukar Control</a>
+                <span class="text-slate-400 dark:text-[#9dabb9] text-sm font-medium">/</span>
+                <span class="text-slate-900 dark:text-white text-sm font-medium">Task Orchestration</span>
+            </div>
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <h1 class="text-2xl font-bold leading-tight tracking-tight text-slate-900 dark:text-white">Task
+                    Orchestration Board</h1>
+                <div class="flex items-center gap-3">
+                    <!-- Action Button -->
+                    <button
+                        class="flex items-center justify-center gap-2 rounded-lg bg-primary hover:bg-blue-600 text-white px-4 py-2 text-sm font-bold shadow-lg shadow-blue-900/20 transition-all">
+                        <span class="material-symbols-outlined text-[20px]">spark</span>
+                        <span>New Task + AI Assist</span>
+                    </button>
+                    <button
+                        class="flex items-center justify-center w-10 h-10 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors">
+                        <span class="material-symbols-outlined text-[20px]">settings</span>
+                    </button>
+                    <div
+                        class="h-10 w-10 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden border border-slate-300 dark:border-slate-600">
+                        <img alt="User Avatar" class="h-full w-full object-cover" data-alt="User profile picture"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzDyEmJAvBUdnOoip18Kqv3OfODfSTQizy9-uNBaYzsnc5LvpT5lPf-vpU594HoCr5Mbv8YVbJpctz1uIa9tYBssHG1vHAhmR9TugApv-cQfi6MhlyZbZ03PgPyEZ6ikzFatbA3qO4GhTvjk5Efu322XURaDI3_4fh4UR-tv8b8kcIPGh-w8G7TqkBtq6b64d4GcGiYDGubk-Zp0wMAddRFUXaWtPlgssg4IogZZE_xFk4DhDEdjNIbz4XmjVp7jFxna0R2Y8SQRiB" />
+                    </div>
+                </div>
+            </div>
+            <!-- Filters Toolbar -->
+            <div class="flex flex-wrap items-center gap-3 mt-6">
+                <div
+                    class="flex items-center px-3 py-1.5 rounded-md bg-slate-100 dark:bg-[#283039] border border-slate-200 dark:border-transparent">
+                    <span
+                        class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mr-2">Filters:</span>
+                    <button
+                        class="flex items-center gap-1.5 px-2 py-1 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-medium text-slate-700 dark:text-slate-300 transition-colors">
+                        Global Priority: High
+                        <span class="material-symbols-outlined text-[16px]">expand_more</span>
+                    </button>
+                    <div class="w-px h-4 bg-slate-300 dark:bg-slate-600 mx-1"></div>
+                    <button
+                        class="flex items-center gap-1.5 px-2 py-1 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-medium text-slate-700 dark:text-slate-300 transition-colors">
+                        Agent: Alpha
+                        <span class="material-symbols-outlined text-[16px]">close</span>
+                    </button>
+                    <button
+                        class="flex items-center gap-1.5 px-2 py-1 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-medium text-slate-700 dark:text-slate-300 transition-colors">
+                        Agent: Beta
+                        <span class="material-symbols-outlined text-[16px]">close</span>
+                    </button>
+                    <button
+                        class="flex items-center gap-1.5 px-2 py-1 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-medium text-primary transition-colors ml-2">
+                        <span class="material-symbols-outlined text-[16px]">add</span>
+                        Add Filter
+                    </button>
+                </div>
+                <div class="flex-1"></div>
+                <div class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+                    <span class="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    System Status: Nominal
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- Main Kanban Board -->
+    <main class="flex-1 overflow-x-auto overflow-y-hidden kanban-container bg-slate-50 dark:bg-[#0b1015] p-6">
+        <div class="flex h-full gap-6 min-w-max">
+            <!-- Column: Backlog -->
+            <div
+                class="flex flex-col w-[340px] h-full rounded-xl bg-slate-100 dark:bg-[#161b22] border border-slate-200 dark:border-slate-800 shadow-sm">
+                <div
+                    class="p-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center sticky top-0 bg-inherit rounded-t-xl z-10">
+                    <div class="flex items-center gap-2">
+                        <div class="h-2 w-2 rounded-full bg-slate-400"></div>
+                        <h3 class="font-bold text-slate-700 dark:text-slate-200">Backlog</h3>
+                        <span
+                            class="px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800 text-xs font-medium text-slate-600 dark:text-slate-400">12</span>
+                    </div>
+                    <button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+                        <span class="material-symbols-outlined text-[20px]">add</span>
+                    </button>
+                </div>
+                <div class="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar">
+                    <!-- Card -->
+                    <div
+                        class="group relative flex flex-col gap-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#1e252e] p-4 shadow-sm hover:shadow-md transition-all cursor-pointer hover:border-primary/50">
+                        <div class="flex justify-between items-start">
+                            <span
+                                class="text-[10px] font-bold tracking-wider text-slate-400 dark:text-slate-500">TASK-8921</span>
+                            <span
+                                class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">MED</span>
+                        </div>
+                        <h4 class="text-sm font-semibold text-slate-800 dark:text-slate-200 leading-snug">Ingest Q3
+                            Financial Dataset for Anomaly Detection</h4>
+                        <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                            <span class="material-symbols-outlined text-[14px]">smart_toy</span>
+                            <span>Unassigned</span>
+                        </div>
+                        <div
+                            class="mt-1 pt-3 border-t border-slate-100 dark:border-slate-700/50 flex justify-between items-center">
+                            <span class="text-[10px] text-slate-400">Created 2h ago</span>
+                            <div class="flex -space-x-1.5">
+                                <div
+                                    class="h-5 w-5 rounded-full bg-purple-500 flex items-center justify-center text-[8px] text-white font-bold border border-white dark:border-[#1e252e]">
+                                    AI</div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Card -->
+                    <div
+                        class="group relative flex flex-col gap-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#1e252e] p-4 shadow-sm hover:shadow-md transition-all cursor-pointer hover:border-primary/50">
+                        <div class="flex justify-between items-start">
+                            <span
+                                class="text-[10px] font-bold tracking-wider text-slate-400 dark:text-slate-500">TASK-8934</span>
+                            <span
+                                class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-500/10 text-slate-600 dark:text-slate-400 border border-slate-500/20">LOW</span>
+                        </div>
+                        <h4 class="text-sm font-semibold text-slate-800 dark:text-slate-200 leading-snug">Routine
+                            heuristic model update v4.2</h4>
+                        <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                            <span class="material-symbols-outlined text-[14px]">smart_toy</span>
+                            <span>Unassigned</span>
+                        </div>
+                        <div
+                            class="mt-1 pt-3 border-t border-slate-100 dark:border-slate-700/50 flex justify-between items-center">
+                            <span class="text-[10px] text-slate-400">Created 5h ago</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Column: Active (Main Agent) -->
+            <div
+                class="flex flex-col w-[340px] h-full rounded-xl bg-slate-100 dark:bg-[#161b22] border border-slate-200 dark:border-slate-800 shadow-sm">
+                <div
+                    class="p-4 border-b border-primary/30 flex justify-between items-center sticky top-0 bg-inherit rounded-t-xl z-10 bg-gradient-to-r from-transparent to-primary/5">
+                    <div class="flex items-center gap-2">
+                        <div class="h-2 w-2 rounded-full bg-primary shadow-[0_0_8px_rgba(19,127,236,0.6)]"></div>
+                        <h3 class="font-bold text-slate-700 dark:text-slate-200">Active (Main Agent)</h3>
+                        <span class="px-2 py-0.5 rounded-full bg-primary/20 text-xs font-medium text-primary">4</span>
+                    </div>
+                </div>
+                <div class="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar">
+                    <!-- High Density Active Card -->
+                    <div
+                        class="group relative flex flex-col gap-2 rounded-lg border-l-4 border-l-primary border-y border-r border-slate-200 dark:border-y-slate-700 dark:border-r-slate-700 bg-white dark:bg-[#1e252e] p-4 shadow-sm hover:shadow-lg transition-all cursor-pointer">
+                        <div class="flex justify-between items-start mb-1">
+                            <div class="flex flex-col">
+                                <span class="text-[10px] font-bold tracking-wider text-primary">TASK-8801</span>
+                                <h4 class="text-sm font-bold text-slate-900 dark:text-white leading-tight mt-1">
+                                    Cross-Modal Data Synthesis</h4>
+                            </div>
+                            <span
+                                class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/10 text-rose-500 border border-rose-500/20">HIGH</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 my-2">
+                            <div
+                                class="bg-slate-50 dark:bg-[#13181e] p-2 rounded border border-slate-100 dark:border-slate-700/50">
+                                <span class="text-[10px] text-slate-500 uppercase font-semibold block mb-0.5">Agent
+                                    ID</span>
+                                <span class="text-xs text-slate-800 dark:text-slate-200 font-mono">CORE-ALPHA</span>
+                            </div>
+                            <div
+                                class="bg-slate-50 dark:bg-[#13181e] p-2 rounded border border-slate-100 dark:border-slate-700/50">
+                                <span
+                                    class="text-[10px] text-slate-500 uppercase font-semibold block mb-0.5">Alignment</span>
+                                <div class="flex items-center gap-2">
+                                    <div
+                                        class="h-1.5 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                                        <div class="h-full bg-emerald-500 w-[92%]"></div>
+                                    </div>
+                                    <span class="text-[10px] font-bold text-emerald-500">92%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div
+                            class="mt-2 pt-2 border-t border-slate-100 dark:border-slate-700/50 flex justify-between items-center">
+                            <button
+                                class="text-[11px] font-medium text-primary hover:text-blue-400 flex items-center gap-1 group-hover:underline decoration-primary/50 underline-offset-2">
+                                <span class="material-symbols-outlined text-[14px]">account_tree</span>
+                                View Logic
+                            </button>
+                            <span class="text-[10px] text-slate-400">Updated 2m ago</span>
+                        </div>
+                    </div>
+                    <!-- Active Card 2 -->
+                    <div
+                        class="group relative flex flex-col gap-2 rounded-lg border-l-4 border-l-primary border-y border-r border-slate-200 dark:border-y-slate-700 dark:border-r-slate-700 bg-white dark:bg-[#1e252e] p-4 shadow-sm hover:shadow-lg transition-all cursor-pointer">
+                        <div class="flex justify-between items-start mb-1">
+                            <div class="flex flex-col">
+                                <span class="text-[10px] font-bold tracking-wider text-primary">TASK-8845</span>
+                                <h4 class="text-sm font-bold text-slate-900 dark:text-white leading-tight mt-1">Language
+                                    Model Context Compression</h4>
+                            </div>
+                            <span
+                                class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">MED</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 my-2">
+                            <div
+                                class="bg-slate-50 dark:bg-[#13181e] p-2 rounded border border-slate-100 dark:border-slate-700/50">
+                                <span class="text-[10px] text-slate-500 uppercase font-semibold block mb-0.5">Agent
+                                    ID</span>
+                                <span class="text-xs text-slate-800 dark:text-slate-200 font-mono">CORE-BETA</span>
+                            </div>
+                            <div
+                                class="bg-slate-50 dark:bg-[#13181e] p-2 rounded border border-slate-100 dark:border-slate-700/50">
+                                <span
+                                    class="text-[10px] text-slate-500 uppercase font-semibold block mb-0.5">Alignment</span>
+                                <div class="flex items-center gap-2">
+                                    <div
+                                        class="h-1.5 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                                        <div class="h-full bg-primary w-[78%]"></div>
+                                    </div>
+                                    <span class="text-[10px] font-bold text-primary">78%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div
+                            class="mt-2 pt-2 border-t border-slate-100 dark:border-slate-700/50 flex justify-between items-center">
+                            <button
+                                class="text-[11px] font-medium text-primary hover:text-blue-400 flex items-center gap-1 group-hover:underline decoration-primary/50 underline-offset-2">
+                                <span class="material-symbols-outlined text-[14px]">account_tree</span>
+                                View Logic
+                            </button>
+                            <span class="text-[10px] text-slate-400">Updated 15m ago</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Column: Executing (Sub-Agents) -->
+            <div
+                class="flex flex-col w-[340px] h-full rounded-xl bg-slate-100 dark:bg-[#161b22] border border-slate-200 dark:border-slate-800 shadow-sm">
+                <div
+                    class="p-4 border-b border-cyan-500/30 flex justify-between items-center sticky top-0 bg-inherit rounded-t-xl z-10 bg-gradient-to-r from-transparent to-cyan-500/5">
+                    <div class="flex items-center gap-2">
+                        <div
+                            class="h-2 w-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.6)] animate-pulse">
+                        </div>
+                        <h3 class="font-bold text-slate-700 dark:text-slate-200">Executing (Sub-Agents)</h3>
+                        <span class="px-2 py-0.5 rounded-full bg-cyan-500/20 text-xs font-medium text-cyan-500">6</span>
+                    </div>
+                </div>
+                <div class="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar">
+                    <!-- Executing Card with Sparkline -->
+                    <div
+                        class="group relative flex flex-col gap-2 rounded-lg border-l-4 border-l-cyan-400 border-y border-r border-slate-200 dark:border-y-slate-700 dark:border-r-slate-700 bg-white dark:bg-[#1e252e] p-4 shadow-sm hover:shadow-lg transition-all cursor-pointer">
+                        <div class="flex justify-between items-start mb-1">
+                            <div class="flex flex-col">
+                                <span class="text-[10px] font-bold tracking-wider text-cyan-500">TASK-8822</span>
+                                <h4 class="text-sm font-bold text-slate-900 dark:text-white leading-tight mt-1">API
+                                    Endpoint Scraper Node</h4>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <span class="h-2 w-2 rounded-full bg-cyan-500 animate-pulse"></span>
+                                <span class="text-[10px] font-bold text-cyan-500 uppercase">Running</span>
+                            </div>
+                        </div>
+                        <!-- Mini Dashboard inside Card -->
+                        <div
+                            class="bg-slate-50 dark:bg-[#13181e] p-3 rounded border border-slate-100 dark:border-slate-700/50 mt-1">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-[10px] text-slate-500 uppercase font-semibold">SUB-AGENT-09
+                                    Performance</span>
+                                <span class="text-[10px] font-mono text-slate-300">REQ/S: 452</span>
+                            </div>
+                            <!-- SVG Sparkline -->
+                            <div class="h-8 w-full">
+                                <svg height="100%" preserveaspectratio="none" viewbox="0 0 100 30" width="100%">
+                                    <path d="M0,28 L10,20 L20,25 L30,15 L40,18 L50,10 L60,14 L70,5 L80,12 L90,8 L100,20"
+                                        fill="none" stroke="#22d3ee" stroke-width="2"
+                                        vector-effect="non-scaling-stroke"></path>
+                                    <path
+                                        d="M0,28 L10,20 L20,25 L30,15 L40,18 L50,10 L60,14 L70,5 L80,12 L90,8 L100,20 V30 H0 Z"
+                                        fill="url(#gradient-cyan)" opacity="0.2"></path>
+                                    <defs>
+                                        <lineargradient id="gradient-cyan" x1="0%" x2="0%" y1="0%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#22d3ee;stop-opacity:1"></stop>
+                                            <stop offset="100%" style="stop-color:#22d3ee;stop-opacity:0"></stop>
+                                        </lineargradient>
+                                    </defs>
+                                </svg>
+                            </div>
+                        </div>
+                        <div
+                            class="mt-2 pt-2 border-t border-slate-100 dark:border-slate-700/50 flex justify-between items-center">
+                            <div class="flex -space-x-1.5">
+                                <img alt="Sub Agent 9"
+                                    class="h-5 w-5 rounded-full ring-2 ring-white dark:ring-[#1e252e]"
+                                    data-alt="Agent Avatar"
+                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzn0mLC0n3_-w111UUr2l8qmSmBtEh7aVifOBze_lkH29fGagQo3pKjcshN2q8AwZDAGKdUe06nid3ucDveZaMBwc5QkZeWhGKUPz3sq5K9NeJ0EQCa_Ea6XX9YdLxrVEY06b9uLpyVQXTYhp9ZGC2y9fSaz-38IeuUAfhKxOy2L-Fet6cxlNtdV7m5BLXhFIXJOUQMxfaxnE7HYQQ3-pQtDycQajSMZidFHWADU9L5bGi5TBThsaWjq9h0KT16994VF9r_W9JcFP9" />
+                            </div>
+                            <button
+                                class="text-[11px] font-medium text-cyan-500 hover:text-cyan-400 flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[14px]">terminal</span>
+                                Live Logs
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Executing Card 2 -->
+                    <div
+                        class="group relative flex flex-col gap-2 rounded-lg border-l-4 border-l-cyan-400 border-y border-r border-slate-200 dark:border-y-slate-700 dark:border-r-slate-700 bg-white dark:bg-[#1e252e] p-4 shadow-sm hover:shadow-lg transition-all cursor-pointer">
+                        <div class="flex justify-between items-start mb-1">
+                            <div class="flex flex-col">
+                                <span class="text-[10px] font-bold tracking-wider text-cyan-500">TASK-8819</span>
+                                <h4 class="text-sm font-bold text-slate-900 dark:text-white leading-tight mt-1">Vector
+                                    DB Re-indexing</h4>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <span class="h-2 w-2 rounded-full bg-cyan-500 animate-pulse"></span>
+                            </div>
+                        </div>
+                        <div
+                            class="bg-slate-50 dark:bg-[#13181e] p-3 rounded border border-slate-100 dark:border-slate-700/50 mt-1">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-[10px] text-slate-500 uppercase font-semibold">Progress</span>
+                                <span class="text-[10px] font-mono text-cyan-400">45%</span>
+                            </div>
+                            <div class="h-1.5 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                                <div class="h-full bg-cyan-500 w-[45%]"></div>
+                            </div>
+                        </div>
+                        <div
+                            class="mt-2 pt-2 border-t border-slate-100 dark:border-slate-700/50 flex justify-between items-center">
+                            <span class="text-[10px] text-slate-400">Started 45m ago</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Column: Blocked / Review -->
+            <div
+                class="flex flex-col w-[340px] h-full rounded-xl bg-slate-100 dark:bg-[#161b22] border border-slate-200 dark:border-slate-800 shadow-sm relative">
+                <!-- Optional background pattern for blocked column to indicate caution -->
+                <div
+                    class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImEiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTTAgNDBMODAgMEgwTDUwIDQwSDB6IiBmaWxsPSIjRkZCMDAwIiBmaWxsLW9wYWNpdHk9IjAuMDIiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjYSkiLz48L3N2Zz4=')] opacity-30 pointer-events-none rounded-xl">
+                </div>
+                <div
+                    class="p-4 border-b border-amber-500/30 flex justify-between items-center sticky top-0 bg-inherit rounded-t-xl z-10 bg-gradient-to-r from-transparent to-amber-500/10">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-amber-500 text-[20px]">warning</span>
+                        <h3 class="font-bold text-slate-700 dark:text-slate-200">Blocked / Review</h3>
+                        <span
+                            class="px-2 py-0.5 rounded-full bg-amber-500/20 text-xs font-medium text-amber-500">2</span>
+                    </div>
+                </div>
+                <div class="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar relative z-10">
+                    <!-- Blocked Card -->
+                    <div
+                        class="group relative flex flex-col gap-2 rounded-lg border-l-4 border-l-amber-500 border-y border-r border-slate-200 dark:border-y-slate-700 dark:border-r-slate-700 bg-white dark:bg-[#1e252e] p-4 shadow-sm hover:shadow-lg transition-all cursor-pointer">
+                        <div class="flex justify-between items-start mb-1">
+                            <div class="flex flex-col">
+                                <span class="text-[10px] font-bold tracking-wider text-amber-500">TASK-8774</span>
+                                <h4 class="text-sm font-bold text-slate-900 dark:text-white leading-tight mt-1">Verify
+                                    User Identity - Edge Case</h4>
+                            </div>
+                        </div>
+                        <div
+                            class="bg-amber-500/10 border border-amber-500/20 p-2.5 rounded-md flex items-start gap-2 my-1">
+                            <span
+                                class="material-symbols-outlined text-amber-500 text-[18px] mt-0.5">person_alert</span>
+                            <div class="flex flex-col">
+                                <span class="text-[10px] font-bold text-amber-600 dark:text-amber-500 uppercase">Reason:
+                                    Human Required</span>
+                                <span class="text-[11px] text-amber-800 dark:text-amber-200/80 leading-snug">Confidence
+                                    score below threshold (45%). Manual verification needed.</span>
+                            </div>
+                        </div>
+                        <div
+                            class="mt-2 pt-2 border-t border-slate-100 dark:border-slate-700/50 flex justify-between items-center">
+                            <button
+                                class="px-3 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded text-[11px] font-bold transition-colors">
+                                Resolve
+                            </button>
+                            <span class="text-[10px] text-amber-500/70">Blocked for 2h</span>
+                        </div>
+                    </div>
+                    <!-- Blocked Card 2 -->
+                    <div
+                        class="group relative flex flex-col gap-2 rounded-lg border-l-4 border-l-amber-500 border-y border-r border-slate-200 dark:border-y-slate-700 dark:border-r-slate-700 bg-white dark:bg-[#1e252e] p-4 shadow-sm hover:shadow-lg transition-all cursor-pointer">
+                        <div class="flex justify-between items-start mb-1">
+                            <div class="flex flex-col">
+                                <span class="text-[10px] font-bold tracking-wider text-amber-500">TASK-8902</span>
+                                <h4 class="text-sm font-bold text-slate-900 dark:text-white leading-tight mt-1">Payment
+                                    Gateway Integration</h4>
+                            </div>
+                            <span
+                                class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/10 text-rose-500 border border-rose-500/20">CRIT</span>
+                        </div>
+                        <div
+                            class="bg-amber-500/10 border border-amber-500/20 p-2.5 rounded-md flex items-start gap-2 my-1">
+                            <span class="material-symbols-outlined text-amber-500 text-[18px] mt-0.5">cloud_off</span>
+                            <div class="flex flex-col">
+                                <span class="text-[10px] font-bold text-amber-600 dark:text-amber-500 uppercase">Reason:
+                                    API Timeout</span>
+                                <span class="text-[11px] text-amber-800 dark:text-amber-200/80 leading-snug">Upstream
+                                    provider not responding (504).</span>
+                            </div>
+                        </div>
+                        <div
+                            class="mt-2 pt-2 border-t border-slate-100 dark:border-slate-700/50 flex justify-between items-center">
+                            <button
+                                class="text-[11px] font-medium text-slate-400 hover:text-white flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[14px]">replay</span>
+                                Retry
+                            </button>
+                            <span class="text-[10px] text-amber-500/70">Blocked for 15m</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Column: Completed -->
+            <div
+                class="flex flex-col w-[340px] h-full rounded-xl bg-slate-100 dark:bg-[#161b22] border border-slate-200 dark:border-slate-800 shadow-sm opacity-90">
+                <div
+                    class="p-4 border-b border-emerald-500/30 flex justify-between items-center sticky top-0 bg-inherit rounded-t-xl z-10 bg-gradient-to-r from-transparent to-emerald-500/5">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-emerald-500 text-[20px]">check_circle</span>
+                        <h3 class="font-bold text-slate-700 dark:text-slate-200">Completed</h3>
+                        <span
+                            class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-xs font-medium text-emerald-500">24</span>
+                    </div>
+                </div>
+                <div class="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar">
+                    <!-- Completed Card -->
+                    <div
+                        class="group relative flex flex-col gap-2 rounded-lg border-l-4 border-l-emerald-500 border-y border-r border-slate-200 dark:border-y-slate-700 dark:border-r-slate-700 bg-white dark:bg-[#1e252e] p-4 shadow-sm hover:shadow-lg transition-all cursor-pointer opacity-70 hover:opacity-100">
+                        <div class="flex justify-between items-start mb-1">
+                            <div class="flex flex-col">
+                                <span
+                                    class="text-[10px] font-bold tracking-wider text-emerald-500 line-through decoration-emerald-500/50">TASK-8640</span>
+                                <h4
+                                    class="text-sm font-medium text-slate-500 dark:text-slate-400 leading-tight mt-1 line-through">
+                                    Initial Data Sanitization</h4>
+                            </div>
+                        </div>
+                        <div
+                            class="mt-2 pt-2 border-t border-slate-100 dark:border-slate-700/50 flex justify-between items-center">
+                            <div class="flex items-center gap-1 text-emerald-500">
+                                <span class="material-symbols-outlined text-[14px]">verified</span>
+                                <span class="text-[10px] font-bold">Verified</span>
+                            </div>
+                            <span class="text-[10px] text-slate-500">Yesterday</span>
+                        </div>
+                    </div>
+                    <!-- Completed Card 2 -->
+                    <div
+                        class="group relative flex flex-col gap-2 rounded-lg border-l-4 border-l-emerald-500 border-y border-r border-slate-200 dark:border-y-slate-700 dark:border-r-slate-700 bg-white dark:bg-[#1e252e] p-4 shadow-sm hover:shadow-lg transition-all cursor-pointer opacity-70 hover:opacity-100">
+                        <div class="flex justify-between items-start mb-1">
+                            <div class="flex flex-col">
+                                <span
+                                    class="text-[10px] font-bold tracking-wider text-emerald-500 line-through decoration-emerald-500/50">TASK-8655</span>
+                                <h4
+                                    class="text-sm font-medium text-slate-500 dark:text-slate-400 leading-tight mt-1 line-through">
+                                    Security Handshake Protocol</h4>
+                            </div>
+                        </div>
+                        <div
+                            class="mt-2 pt-2 border-t border-slate-100 dark:border-slate-700/50 flex justify-between items-center">
+                            <div class="flex items-center gap-1 text-emerald-500">
+                                <span class="material-symbols-outlined text-[14px]">verified</span>
+                                <span class="text-[10px] font-bold">Verified</span>
+                            </div>
+                            <span class="text-[10px] text-slate-500">2 days ago</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>

@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Anukar Unified System Logs &amp; Analytics</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#137fec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                        "surface-dark": "#1a242f",
+                        "surface-darker": "#151e26",
+                        "log-error": "#ef4444",
+                        "log-warn": "#f59e0b",
+                        "log-info": "#3b82f6",
+                        "log-debug": "#9ca3af",
+                        "log-success": "#10b981",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "mono": ["JetBrains Mono", "monospace"],
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        /* Custom scrollbar for log viewer */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #151e26;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #2d3748;
+            border-radius: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #4a5568;
+        }
+    </style>
+</head>
+
+<body
+    class="bg-background-light dark:bg-background-dark font-display text-gray-900 dark:text-gray-100 h-screen flex flex-col overflow-hidden">
+    <!-- Global Header -->
+    <header
+        class="flex items-center justify-between border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-surface-dark px-6 py-3 shrink-0 z-20 shadow-sm">
+        <div class="flex items-center gap-6">
+            <div class="flex items-center gap-3 text-gray-900 dark:text-white">
+                <div class="size-8 text-primary flex items-center justify-center">
+                    <span class="material-symbols-outlined text-3xl">hub</span>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold leading-none tracking-tight">Anukar Unified</h1>
+                    <span class="text-xs text-gray-500 dark:text-gray-400 font-medium">System Logs &amp; Analytics
+                        v2.4.1</span>
+                </div>
+            </div>
+            <div class="h-8 w-px bg-gray-200 dark:bg-gray-700 mx-2"></div>
+            <!-- Search Bar -->
+            <div class="relative group min-w-[480px]">
+                <div
+                    class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400 dark:text-gray-500">
+                    <span class="material-symbols-outlined text-xl">search</span>
+                </div>
+                <input
+                    class="block w-full rounded-lg border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-surface-darker py-2.5 pl-10 pr-24 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:border-primary focus:ring-1 focus:ring-primary dark:focus:border-primary transition-colors"
+                    placeholder="Search logs (e.g. error caused by Agent-A)..." type="text" />
+                <div class="absolute inset-y-0 right-0 flex items-center pr-2">
+                    <button
+                        class="flex items-center gap-1 rounded px-2 py-1 text-xs font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                        title="Enable Regex">
+                        <span class="font-mono text-[10px] border border-current rounded px-1">.*</span>
+                        <span>Regex</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/20">
+                <span class="relative flex h-2 w-2">
+                    <span
+                        class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                </span>
+                <span class="text-xs font-semibold text-green-500">System Healthy</span>
+            </div>
+            <div class="h-8 w-px bg-gray-200 dark:bg-gray-700"></div>
+            <div class="flex gap-2">
+                <button
+                    class="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors relative">
+                    <span class="material-symbols-outlined text-xl">notifications</span>
+                    <span
+                        class="absolute top-2 right-2 size-2 bg-primary rounded-full ring-2 ring-white dark:ring-surface-dark"></span>
+                </button>
+                <button
+                    class="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                    <span class="material-symbols-outlined text-xl">settings</span>
+                </button>
+                <button
+                    class="ml-2 flex items-center gap-2 pl-1 pr-3 py-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                    <div class="size-8 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-white font-bold text-xs"
+                        data-alt="User Avatar Gradient">JD</div>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-200">Admin</span>
+                </button>
+            </div>
+        </div>
+    </header>
+    <div class="flex flex-1 overflow-hidden">
+        <!-- Left Sidebar: Filters -->
+        <aside
+            class="w-64 flex flex-col border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-surface-dark shrink-0 overflow-y-auto custom-scrollbar">
+            <div class="p-4 space-y-6">
+                <!-- Log Levels -->
+                <div>
+                    <h3
+                        class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 px-2">
+                        Log Levels</h3>
+                    <div class="space-y-1">
+                        <label
+                            class="flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer group">
+                            <div class="flex items-center gap-3">
+                                <input checked=""
+                                    class="rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary bg-transparent"
+                                    type="checkbox" />
+                                <span class="text-sm text-gray-700 dark:text-gray-300 font-medium">Info</span>
+                            </div>
+                            <span
+                                class="text-xs font-mono text-gray-400 dark:text-gray-600 bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">12k</span>
+                        </label>
+                        <label
+                            class="flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer group">
+                            <div class="flex items-center gap-3">
+                                <input checked=""
+                                    class="rounded border-gray-300 dark:border-gray-600 text-log-warn focus:ring-log-warn bg-transparent"
+                                    type="checkbox" />
+                                <span class="text-sm text-gray-700 dark:text-gray-300 font-medium">Warning</span>
+                            </div>
+                            <span
+                                class="text-xs font-mono text-log-warn bg-log-warn/10 px-1.5 py-0.5 rounded">342</span>
+                        </label>
+                        <label
+                            class="flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer group">
+                            <div class="flex items-center gap-3">
+                                <input checked=""
+                                    class="rounded border-gray-300 dark:border-gray-600 text-log-error focus:ring-log-error bg-transparent"
+                                    type="checkbox" />
+                                <span class="text-sm text-gray-700 dark:text-gray-300 font-medium">Error</span>
+                            </div>
+                            <span
+                                class="text-xs font-mono text-log-error bg-log-error/10 px-1.5 py-0.5 rounded">5</span>
+                        </label>
+                        <label
+                            class="flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer group">
+                            <div class="flex items-center gap-3">
+                                <input
+                                    class="rounded border-gray-300 dark:border-gray-600 text-purple-500 focus:ring-purple-500 bg-transparent"
+                                    type="checkbox" />
+                                <span class="text-sm text-gray-700 dark:text-gray-300 font-medium">Critical</span>
+                            </div>
+                            <span
+                                class="text-xs font-mono text-gray-400 dark:text-gray-600 bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">0</span>
+                        </label>
+                        <label
+                            class="flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer group">
+                            <div class="flex items-center gap-3">
+                                <input
+                                    class="rounded border-gray-300 dark:border-gray-600 text-gray-500 focus:ring-gray-500 bg-transparent"
+                                    type="checkbox" />
+                                <span class="text-sm text-gray-700 dark:text-gray-300 font-medium">Debug</span>
+                            </div>
+                            <span
+                                class="text-xs font-mono text-gray-400 dark:text-gray-600 bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">45k</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="h-px bg-gray-200 dark:bg-gray-800"></div>
+                <!-- Source Agents -->
+                <div>
+                    <div class="flex items-center justify-between mb-3 px-2">
+                        <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            Agents</h3>
+                        <button class="text-xs text-primary hover:text-primary/80">Select All</button>
+                    </div>
+                    <div class="space-y-1">
+                        <label
+                            class="flex items-center gap-3 px-2 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer">
+                            <input checked=""
+                                class="rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary bg-transparent"
+                                type="checkbox" />
+                            <span class="text-sm text-gray-700 dark:text-gray-300">Core System</span>
+                        </label>
+                        <label
+                            class="flex items-center gap-3 px-2 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer">
+                            <input checked=""
+                                class="rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary bg-transparent"
+                                type="checkbox" />
+                            <span class="text-sm text-gray-700 dark:text-gray-300">Main Agent</span>
+                        </label>
+                        <div class="pl-6 space-y-1">
+                            <label
+                                class="flex items-center gap-3 px-2 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer">
+                                <input checked=""
+                                    class="rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary bg-transparent"
+                                    type="checkbox" />
+                                <span class="text-sm text-gray-500 dark:text-gray-400">Sub-Agent A</span>
+                            </label>
+                            <label
+                                class="flex items-center gap-3 px-2 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer">
+                                <input checked=""
+                                    class="rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary bg-transparent"
+                                    type="checkbox" />
+                                <span class="text-sm text-gray-500 dark:text-gray-400">Sub-Agent B</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="h-px bg-gray-200 dark:bg-gray-800"></div>
+                <!-- Time Range -->
+                <div>
+                    <h3
+                        class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 px-2">
+                        Time Range</h3>
+                    <div class="px-2">
+                        <select
+                            class="w-full bg-gray-50 dark:bg-surface-darker border-gray-300 dark:border-gray-700 text-sm rounded-lg focus:ring-primary focus:border-primary text-gray-900 dark:text-gray-300 p-2.5">
+                            <option>Last 15 Minutes</option>
+                            <option>Last Hour</option>
+                            <option>Last 24 Hours</option>
+                            <option>Custom Range</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        <!-- Main Content: Log Viewer -->
+        <main class="flex-1 flex flex-col min-w-0 bg-background-light dark:bg-background-dark relative">
+            <!-- Toolbar -->
+            <div
+                class="h-10 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-surface-dark flex items-center justify-between px-4 shrink-0">
+                <div class="flex items-center gap-4 text-xs font-mono text-gray-500 dark:text-gray-400">
+                    <span>Showing 1-50 of 12,402 logs</span>
+                    <span class="h-4 w-px bg-gray-300 dark:bg-gray-700"></span>
+                    <button class="hover:text-primary flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">pause</span> Pause Stream
+                    </button>
+                    <button class="hover:text-primary flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">delete</span> Clear
+                    </button>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button
+                        class="text-xs px-3 py-1 bg-primary/10 hover:bg-primary/20 text-primary rounded font-medium transition-colors">
+                        Export Logs
+                    </button>
+                </div>
+            </div>
+            <!-- Log Rows Container -->
+            <div class="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1 font-mono text-sm leading-relaxed"
+                id="log-container">
+                <!-- Log Entry: Info with Context -->
+                <div
+                    class="group flex items-start gap-3 p-2 rounded hover:bg-white dark:hover:bg-surface-darker border border-transparent hover:border-gray-200 dark:hover:border-gray-800 transition-colors">
+                    <div class="text-gray-500 dark:text-gray-500 shrink-0 select-none w-24">14:02:05.112</div>
+                    <div class="w-16 shrink-0 text-log-info font-bold">INFO</div>
+                    <div class="w-32 shrink-0 text-purple-400 truncate" title="Main Agent">Main Agent</div>
+                    <div class="flex-1 text-gray-700 dark:text-gray-300 break-all">
+                        <span>Processing natural language query for task decomposition.</span>
+                        <div class="mt-1 flex items-center gap-2">
+                            <span
+                                class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-primary/10 text-primary hover:bg-primary/20 cursor-pointer border border-primary/20">
+                                <span class="material-symbols-outlined text-[10px]">account_tree</span>
+                                Context: Task #8821
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Log Entry: Thought Process (Collapsed by default logic visual) -->
+                <div
+                    class="group flex items-start gap-3 p-2 rounded hover:bg-white dark:hover:bg-surface-darker border border-transparent hover:border-gray-200 dark:hover:border-gray-800 transition-colors bg-surface-darker/30">
+                    <div class="text-gray-500 dark:text-gray-500 shrink-0 select-none w-24">14:02:05.240</div>
+                    <div class="w-16 shrink-0 text-log-debug font-bold">DEBUG</div>
+                    <div class="w-32 shrink-0 text-teal-400 truncate" title="Core System">Core System</div>
+                    <div class="flex-1 text-gray-700 dark:text-gray-300">
+                        <span class="text-gray-400 italic">// Analyzing dependencies</span>
+                        <div class="mt-1 p-2 bg-gray-900/50 rounded border border-gray-700/50 text-xs">
+                            <pre class="overflow-x-auto text-gray-300"><span class="text-purple-400">"thought_trace"</span>: {
+  <span class="text-blue-400">"step"</span>: <span class="text-green-400">"dependency_check"</span>,
+  <span class="text-blue-400">"nodes"</span>: [<span class="text-yellow-400">"A1"</span>, <span class="text-yellow-400">"B2"</span>],
+  <span class="text-blue-400">"status"</span>: <span class="text-green-400">"resolving"</span>
+}</pre>
+                        </div>
+                    </div>
+                </div>
+                <!-- Log Entry: Warning -->
+                <div
+                    class="group flex items-start gap-3 p-2 rounded bg-log-warn/5 border border-log-warn/10 hover:border-log-warn/30 transition-colors">
+                    <div class="text-gray-500 dark:text-gray-500 shrink-0 select-none w-24">14:02:06.005</div>
+                    <div class="w-16 shrink-0 text-log-warn font-bold">WARN</div>
+                    <div class="w-32 shrink-0 text-orange-300 truncate" title="Sub-Agent A">Sub-Agent A</div>
+                    <div class="flex-1 text-gray-700 dark:text-gray-300">
+                        Response time degradation detected in vector search (240ms &gt; 100ms threshold).
+                    </div>
+                </div>
+                <!-- Log Entry: Info -->
+                <div
+                    class="group flex items-start gap-3 p-2 rounded hover:bg-white dark:hover:bg-surface-darker border border-transparent hover:border-gray-200 dark:hover:border-gray-800 transition-colors">
+                    <div class="text-gray-500 dark:text-gray-500 shrink-0 select-none w-24">14:02:06.155</div>
+                    <div class="w-16 shrink-0 text-log-info font-bold">INFO</div>
+                    <div class="w-32 shrink-0 text-purple-400 truncate" title="Main Agent">Main Agent</div>
+                    <div class="flex-1 text-gray-700 dark:text-gray-300">
+                        Retrying connection to knowledge graph node. Attempt 1/3.
+                    </div>
+                </div>
+                <!-- Log Entry: Error -->
+                <div
+                    class="group flex items-start gap-3 p-2 rounded bg-log-error/5 border border-log-error/10 hover:border-log-error/30 transition-colors">
+                    <div class="text-gray-500 dark:text-gray-500 shrink-0 select-none w-24">14:02:07.412</div>
+                    <div class="w-16 shrink-0 text-log-error font-bold">ERROR</div>
+                    <div class="w-32 shrink-0 text-red-300 truncate" title="Sub-Agent B">Sub-Agent B</div>
+                    <div class="flex-1 text-gray-700 dark:text-gray-300">
+                        <span>Failed to parse schema definition.</span>
+                        <div class="mt-2 text-xs font-mono">
+                            <span class="text-log-error">Error: Unexpected token '}' in JSON at position 421</span>
+                            <br />
+                            <span class="text-gray-500">at JSON.parse (&lt;anonymous&gt;)</span>
+                            <br />
+                            <span class="text-gray-500">at Agent.validateOutput (/src/agents/base.ts:145:22)</span>
+                        </div>
+                        <div class="mt-2 flex items-center gap-2">
+                            <span
+                                class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-log-error/10 text-log-error hover:bg-log-error/20 cursor-pointer border border-log-error/20">
+                                <span class="material-symbols-outlined text-[10px]">bug_report</span>
+                                Inspect Trace
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Log Entry: Info -->
+                <div
+                    class="group flex items-start gap-3 p-2 rounded hover:bg-white dark:hover:bg-surface-darker border border-transparent hover:border-gray-200 dark:hover:border-gray-800 transition-colors">
+                    <div class="text-gray-500 dark:text-gray-500 shrink-0 select-none w-24">14:02:08.001</div>
+                    <div class="w-16 shrink-0 text-log-info font-bold">INFO</div>
+                    <div class="w-32 shrink-0 text-teal-400 truncate" title="Core System">Core System</div>
+                    <div class="flex-1 text-gray-700 dark:text-gray-300">
+                        Rolling back transaction #9921 due to upstream failure.
+                    </div>
+                </div>
+                <!-- Log Entry: Success -->
+                <div
+                    class="group flex items-start gap-3 p-2 rounded hover:bg-white dark:hover:bg-surface-darker border border-transparent hover:border-gray-200 dark:hover:border-gray-800 transition-colors">
+                    <div class="text-gray-500 dark:text-gray-500 shrink-0 select-none w-24">14:02:08.450</div>
+                    <div class="w-16 shrink-0 text-log-success font-bold">SUCCESS</div>
+                    <div class="w-32 shrink-0 text-purple-400 truncate" title="Main Agent">Main Agent</div>
+                    <div class="flex-1 text-gray-700 dark:text-gray-300">
+                        Fallback strategy initiated successfully. Switched to model `gpt-4-turbo-preview`.
+                    </div>
+                </div>
+                <!-- More rows would go here in a real app -->
+                <div class="text-center py-4">
+                    <span class="loading-dots text-gray-500 text-xs tracking-widest animate-pulse">... LOADING LIVE LOGS
+                        ...</span>
+                </div>
+            </div>
+        </main>
+        <!-- Right Panel: Analytics & Pulse -->
+        <aside
+            class="w-80 border-l border-gray-200 dark:border-gray-800 bg-white dark:bg-surface-dark shrink-0 overflow-y-auto custom-scrollbar">
+            <div class="p-5 space-y-6">
+                <!-- Live Error Rate Widget -->
+                <div
+                    class="rounded-xl bg-gray-50 dark:bg-surface-darker p-4 border border-gray-100 dark:border-gray-800 shadow-sm">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Live Error Rate</h3>
+                        <span
+                            class="text-xs font-mono text-log-error bg-log-error/10 px-1.5 py-0.5 rounded">+2.4%</span>
+                    </div>
+                    <div class="h-16 w-full flex items-end gap-[2px]">
+                        <!-- Simulated Sparkline using divs -->
+                        <div class="w-1 bg-gray-300 dark:bg-gray-700 h-[20%]" title="Time -10m"></div>
+                        <div class="w-1 bg-gray-300 dark:bg-gray-700 h-[30%]"></div>
+                        <div class="w-1 bg-gray-300 dark:bg-gray-700 h-[25%]"></div>
+                        <div class="w-1 bg-gray-300 dark:bg-gray-700 h-[40%]"></div>
+                        <div class="w-1 bg-gray-300 dark:bg-gray-700 h-[35%]"></div>
+                        <div class="w-1 bg-gray-300 dark:bg-gray-700 h-[20%]"></div>
+                        <div class="w-1 bg-gray-300 dark:bg-gray-700 h-[25%]"></div>
+                        <div class="w-1 bg-gray-300 dark:bg-gray-700 h-[30%]"></div>
+                        <div class="w-1 bg-log-error/50 h-[60%]"></div>
+                        <div class="w-1 bg-log-error/60 h-[70%]"></div>
+                        <div class="w-1 bg-log-error/40 h-[50%]"></div>
+                        <div class="w-1 bg-log-error/80 h-[85%]"></div>
+                        <div class="w-1 bg-log-error h-[65%]"></div>
+                        <div class="w-1 bg-log-error h-[55%]"></div>
+                        <div class="w-1 bg-gray-300 dark:bg-gray-700 h-[30%]"></div>
+                        <div class="w-1 bg-gray-300 dark:bg-gray-700 h-[25%]"></div>
+                        <div class="w-1 bg-gray-300 dark:bg-gray-700 h-[20%]"></div>
+                        <div class="w-1 bg-gray-300 dark:bg-gray-700 h-[15%]"></div>
+                    </div>
+                    <p class="text-[10px] text-gray-400 mt-2 text-right">Last 10 minutes</p>
+                </div>
+                <!-- Log Volume Histogram -->
+                <div>
+                    <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Log
+                        Volume (1H)</h3>
+                    <div
+                        class="h-32 rounded-lg border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-surface-darker relative overflow-hidden flex items-end justify-between px-2 pb-2">
+                        <!-- Bars -->
+                        <div class="w-2 bg-primary/30 rounded-t-sm h-[40%]"></div>
+                        <div class="w-2 bg-primary/40 rounded-t-sm h-[55%]"></div>
+                        <div class="w-2 bg-primary/30 rounded-t-sm h-[35%]"></div>
+                        <div class="w-2 bg-primary/50 rounded-t-sm h-[65%]"></div>
+                        <div class="w-2 bg-primary/60 rounded-t-sm h-[80%]"></div>
+                        <div class="w-2 bg-primary/40 rounded-t-sm h-[50%]"></div>
+                        <div class="w-2 bg-primary/30 rounded-t-sm h-[45%]"></div>
+                        <div class="w-2 bg-primary/20 rounded-t-sm h-[30%]"></div>
+                        <div class="w-2 bg-primary/30 rounded-t-sm h-[40%]"></div>
+                        <div class="w-2 bg-primary/50 rounded-t-sm h-[60%]"></div>
+                    </div>
+                </div>
+                <!-- Recurring Patterns -->
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Top
+                            Patterns</h3>
+                        <span class="material-symbols-outlined text-gray-400 text-sm cursor-help"
+                            title="AI Identified anomalies">smart_toy</span>
+                    </div>
+                    <div class="space-y-3">
+                        <!-- Pattern Item -->
+                        <div
+                            class="p-3 rounded-lg bg-gray-50 dark:bg-surface-darker border border-gray-200 dark:border-gray-700 hover:border-primary/50 transition-colors cursor-pointer">
+                            <div class="flex justify-between items-start mb-1">
+                                <span class="text-xs font-bold text-log-error">Loop Detection</span>
+                                <span
+                                    class="text-[10px] font-mono bg-gray-200 dark:bg-gray-800 px-1.5 rounded">5x</span>
+                            </div>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 leading-snug">
+                                Agent reasoning loop identified in `Sub-Agent B` near Task #440.
+                            </p>
+                        </div>
+                        <!-- Pattern Item -->
+                        <div
+                            class="p-3 rounded-lg bg-gray-50 dark:bg-surface-darker border border-gray-200 dark:border-gray-700 hover:border-primary/50 transition-colors cursor-pointer">
+                            <div class="flex justify-between items-start mb-1">
+                                <span class="text-xs font-bold text-log-warn">Schema Mismatch</span>
+                                <span
+                                    class="text-[10px] font-mono bg-gray-200 dark:bg-gray-800 px-1.5 rounded">12x</span>
+                            </div>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 leading-snug">
+                                Inconsistent JSON output keys from `Main Agent`.
+                            </p>
+                        </div>
+                        <!-- Pattern Item -->
+                        <div
+                            class="p-3 rounded-lg bg-gray-50 dark:bg-surface-darker border border-gray-200 dark:border-gray-700 hover:border-primary/50 transition-colors cursor-pointer">
+                            <div class="flex justify-between items-start mb-1">
+                                <span class="text-xs font-bold text-log-info">Context Switch</span>
+                                <span
+                                    class="text-[10px] font-mono bg-gray-200 dark:bg-gray-800 px-1.5 rounded">48x</span>
+                            </div>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 leading-snug">
+                                High frequency context switching detected in Core.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Footer Stats -->
+                <div class="border-t border-gray-200 dark:border-gray-800 pt-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-[10px] text-gray-500 uppercase tracking-wide">Processed</p>
+                            <p class="text-lg font-mono font-semibold">1.2GB</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-gray-500 uppercase tracking-wide">Avg Latency</p>
+                            <p class="text-lg font-mono font-semibold">45ms</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+</body>
+
+</html>
