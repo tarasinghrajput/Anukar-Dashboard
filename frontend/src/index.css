@@ -1,9 +1,22 @@
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+/* Custom theme */
+@theme {
+  --color-primary: #137fec;
+  --color-background-light: #f6f7f8;
+  --color-background-dark: #101922;
+  --color-surface-dark: #1c2632;
+  --color-accent-cyan: #06b6d4;
+  --color-accent-amber: #f59e0b;
+  --color-accent-green: #10b981;
+  --color-accent-red: #ef4444;
+  
+  --font-family-display: 'Space Grotesk', sans-serif;
+  --font-family-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
@@ -25,7 +38,9 @@
 }
 
 body {
-  @apply bg-background-dark font-display text-slate-200;
+  background-color: var(--color-background-dark);
+  font-family: var(--font-family-display);
+  color: #e2e8f0;
 }
 
 .material-symbols-outlined {
