@@ -14,7 +14,7 @@ const learningsRouter = require('./routes/learnings');
 const systemRouter = require('./routes/system');
 
 // Import socket handler
-const { initSocket } = require('./socket');
+const { initSocket, emitEvent } = require('./socket');
 
 const app = express();
 const server = http.createServer(app);
@@ -70,6 +70,17 @@ app.get('/', (req, res) => {
       health: '/health'
     }
   });
+});
+
+// Internal broadcast endpoint (for activity logger)
+app.post('/internal/broadcast', (req, res) => {
+  const { event, data } = req.body;
+  if (event && data) {
+    emitEvent(event, data);
+    res.json({ success: true, event });
+  } else {
+    res.status(400).json({ error: 'Missing event or data' });
+  }
 });
 
 // Error handler

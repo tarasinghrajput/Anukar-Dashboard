@@ -149,6 +149,26 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+// Clear all tasks (for resetting dashboard)
+router.delete('/clear/all', async (req, res) => {
+  try {
+    const result = await Task.deleteMany({});
+    
+    const log = await Log.create({
+      actor: 'human',
+      action: 'TASKS_CLEARED',
+      reasoningSummary: `Cleared ${result.deletedCount} tasks from dashboard`
+    });
+    
+    emitEvent('TASKS_CLEARED', { count: result.deletedCount });
+    emitEvent('LOG_CREATED', log);
+    
+    res.json({ message: 'All tasks cleared', deletedCount: result.deletedCount });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Get task dependencies graph
 router.get('/:id/graph', async (req, res) => {
   try {

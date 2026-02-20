@@ -1,18 +1,24 @@
 import { useEffect, useState } from 'react';
-import { useTaskStore, useAgentStore, useSocketStore, useThemeStore } from '../store';
+import { useTaskStore, useSocketStore, useThemeStore } from '../store';
 import { useSocketEvents } from '../hooks/useSocketEvents';
 import Sidebar from '../components/Sidebar';
 import ConnectionStatus from '../components/ConnectionStatus';
-import { Plus, Search, Clock, User } from 'lucide-react';
+import { Plus, GripVertical, Clock, AlertCircle, CheckCircle2, XCircle, Pause, Loader2 } from 'lucide-react';
+
+const COLUMNS = [
+  { id: 'queued', label: 'Queued', icon: Pause, color: 'slate' },
+  { id: 'active', label: 'Active', icon: Loader2, color: 'cyan' },
+  { id: 'blocked', label: 'Blocked', icon: AlertCircle, color: 'amber' },
+  { id: 'completed', label: 'Completed', icon: CheckCircle2, color: 'green' },
+  { id: 'failed', label: 'Failed', icon: XCircle, color: 'red' },
+];
 
 export default function Tasks() {
   const { connect } = useSocketStore();
   const { tasks, fetchTasks, createTask, updateTaskStatus, loading } = useTaskStore();
-  const { agents, fetchAgents } = useAgentStore();
   const { initTheme, theme } = useThemeStore();
   const [showCreate, setShowCreate] = useState(false);
-  const [filter, setFilter] = useState({ status: '', assignedTo: '' });
-  const [searchQuery, setSearchQuery] = useState('');
+  const [draggedTask, setDraggedTask] = useState(null);
 
   useSocketEvents();
 
@@ -20,17 +26,29 @@ export default function Tasks() {
     initTheme();
     connect();
     fetchTasks();
-    fetchAgents();
   }, []);
 
   const isDark = theme === 'dark';
 
-  const filteredTasks = tasks.filter(task => {
-    if (filter.status && task.status !== filter.status) return false;
-    if (filter.assignedTo && task.assignedTo !== filter.assignedTo) return false;
-    if (searchQuery && !task.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-    return true;
-  });
+  const getTasksByStatus = (status) => tasks.filter(t => t.status === status);
+
+  const handleDragStart = (e, task) => {
+    setDraggedTask(task);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = async (e, newStatus) => {
+    e.preventDefault();
+    if (draggedTask && draggedTask.status !== newStatus) {
+      await updateTaskStatus(draggedTask._id, newStatus, `Moved to ${newStatus}`);
+    }
+    setDraggedTask(null);
+  };
 
   const handleCreateTask = async (e) => {
     e.preventDefault();
@@ -38,14 +56,33 @@ export default function Tasks() {
     await createTask({
       title: formData.get('title'),
       description: formData.get('description'),
-      source: 'human',
+      source: 'core',
+      status: 'queued',
     });
     setShowCreate(false);
     e.target.reset();
   };
 
-  const handleStatusChange = async (taskId, newStatus) => {
-    await updateTaskStatus(taskId, newStatus, `Status changed to ${newStatus}`);
+  const getColumnColor = (color, isDark) => {
+    const colors = {
+      slate: isDark ? 'border-slate-700 bg-slate-800/30' : 'border-slate-300 bg-slate-100',
+      cyan: isDark ? 'border-accent-cyan/50 bg-accent-cyan/10' : 'border-cyan-300 bg-cyan-50',
+      amber: isDark ? 'border-accent-amber/50 bg-accent-amber/10' : 'border-amber-300 bg-amber-50',
+      green: isDark ? 'border-accent-green/50 bg-accent-green/10' : 'border-green-300 bg-green-50',
+      red: isDark ? 'border-accent-red/50 bg-accent-red/10' : 'border-red-300 bg-red-50',
+    };
+    return colors[color];
+  };
+
+  const getIconColor = (color) => {
+    const colors = {
+      slate: 'text-slate-400',
+      cyan: 'text-accent-cyan',
+      amber: 'text-accent-amber',
+      green: 'text-accent-green',
+      red: 'text-accent-red',
+    };
+    return colors[color];
   };
 
   return (
@@ -57,117 +94,101 @@ export default function Tasks() {
         <header className={`h-14 border-b flex items-center justify-between px-6 ${
           isDark ? 'border-slate-800 bg-[#0e1216]' : 'border-slate-200 bg-white'
         }`}>
-          <h1 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>Task Board</h1>
-          <ConnectionStatus />
+          <h1 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+            Task Board - Kanban
+          </h1>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setShowCreate(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-primary rounded-lg hover:bg-primary/80 transition-colors text-white"
+            >
+              <Plus size={18} />
+              <span>New Task</span>
+            </button>
+            <ConnectionStatus />
+          </div>
         </header>
 
-        {/* Toolbar */}
-        <div className={`p-4 border-b flex items-center gap-4 ${
-          isDark ? 'border-slate-800 bg-surface-dark' : 'border-slate-200 bg-slate-50'
-        }`}>
-          <div className="relative flex-1 max-w-md">
-            <Search size={18} className={`absolute left-3 top-1/2 -translate-y-1/2 ${isDark ? 'text-slate-400' : 'text-slate-500'}`} />
-            <input
-              type="text"
-              placeholder="Search tasks..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className={`w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:border-primary ${
-                isDark ? 'bg-background-dark border-slate-800 text-white' : 'bg-white border-slate-300 text-slate-900'
-              }`}
-            />
-          </div>
-          
-          <select
-            value={filter.status}
-            onChange={(e) => setFilter(f => ({ ...f, status: e.target.value }))}
-            className={`px-3 py-2 border rounded-lg text-sm focus:outline-none focus:border-primary ${
-              isDark ? 'bg-background-dark border-slate-800 text-white' : 'bg-white border-slate-300 text-slate-900'
-            }`}
-          >
-            <option value="">All Status</option>
-            <option value="queued">Queued</option>
-            <option value="active">Active</option>
-            <option value="blocked">Blocked</option>
-            <option value="completed">Completed</option>
-            <option value="failed">Failed</option>
-          </select>
-          
-          <button
-            onClick={() => setShowCreate(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-primary rounded-lg hover:bg-primary/80 transition-colors text-white"
-          >
-            <Plus size={18} />
-            <span>New Task</span>
-          </button>
-        </div>
-
-        {/* Task List */}
-        <div className="flex-1 overflow-auto p-6">
-          <div className={`rounded-xl border overflow-hidden ${
-            isDark ? 'bg-surface-dark border-slate-800' : 'bg-white border-slate-200'
-          }`}>
-            <table className="w-full">
-              <thead>
-                <tr className={`border-b ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
-                  <th className={`text-left p-4 text-sm font-medium ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Task</th>
-                  <th className={`text-left p-4 text-sm font-medium ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Status</th>
-                  <th className={`text-left p-4 text-sm font-medium ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Assigned To</th>
-                  <th className={`text-left p-4 text-sm font-medium ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Source</th>
-                  <th className={`text-left p-4 text-sm font-medium ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Created</th>
-                  <th className={`text-left p-4 text-sm font-medium ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Actions</th>
-                </tr>
-              </thead>
-              <tbody className={`divide-y ${isDark ? 'divide-slate-800' : 'divide-slate-200'}`}>
-                {filteredTasks.map((task) => (
-                  <tr key={task._id} className={`transition-colors ${isDark ? 'hover:bg-slate-800/50' : 'hover:bg-slate-50'}`}>
-                    <td className="p-4">
-                      <div>
-                        <p className={`font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>{task.title}</p>
-                        {task.description && (
-                          <p className="text-sm text-slate-400 truncate max-w-xs">{task.description}</p>
-                        )}
-                      </div>
-                    </td>
-                    <td className="p-4"><StatusBadge status={task.status} /></td>
-                    <td className="p-4">
+        {/* Kanban Board */}
+        <div className="flex-1 overflow-x-auto p-6">
+          <div className="flex gap-4 h-full min-w-max">
+            {COLUMNS.map((column) => {
+              const columnTasks = getTasksByStatus(column.id);
+              const Icon = column.icon;
+              
+              return (
+                <div
+                  key={column.id}
+                  className={`w-80 flex-shrink-0 flex flex-col rounded-xl border-2 ${getColumnColor(column.color, isDark)}`}
+                  onDragOver={handleDragOver}
+                  onDrop={(e) => handleDrop(e, column.id)}
+                >
+                  {/* Column Header */}
+                  <div className={`p-4 border-b ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
+                    <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <User size={14} className="text-slate-400" />
-                        <span className={isDark ? 'text-white' : 'text-slate-900'}>{task.assignedTo || 'Unassigned'}</span>
+                        <Icon size={18} className={`${getIconColor(column.color)} ${column.id === 'active' ? 'animate-spin' : ''}`} />
+                        <span className={`font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                          {column.label}
+                        </span>
                       </div>
-                    </td>
-                    <td className="p-4">
-                      <span className={`px-2 py-1 rounded text-xs capitalize ${isDark ? 'bg-slate-800' : 'bg-slate-100'}`}>{task.source}</span>
-                    </td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-2 text-sm text-slate-400">
-                        <Clock size={14} />
-                        {new Date(task.createdAt).toLocaleString()}
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <select
-                        value={task.status}
-                        onChange={(e) => handleStatusChange(task._id, e.target.value)}
-                        className={`px-2 py-1 border rounded text-xs focus:outline-none ${
-                          isDark ? 'bg-background-dark border-slate-800 text-white' : 'bg-white border-slate-300 text-slate-900'
-                        }`}
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                        isDark ? 'bg-slate-700 text-slate-300' : 'bg-slate-200 text-slate-600'
+                      }`}>
+                        {columnTasks.length}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  {/* Tasks */}
+                  <div className="flex-1 overflow-y-auto p-3 space-y-3">
+                    {columnTasks.map((task) => (
+                      <div
+                        key={task._id}
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, task)}
+                        className={`p-4 rounded-lg border cursor-grab active:cursor-grabbing transition-all ${
+                          isDark 
+                            ? 'bg-surface-dark border-slate-700 hover:border-slate-600' 
+                            : 'bg-white border-slate-200 hover:border-slate-300'
+                        } ${draggedTask?._id === task._id ? 'opacity-50' : ''}`}
                       >
-                        <option value="queued">Queued</option>
-                        <option value="active">Active</option>
-                        <option value="blocked">Blocked</option>
-                        <option value="completed">Completed</option>
-                        <option value="failed">Failed</option>
-                      </select>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            
-            {filteredTasks.length === 0 && !loading && (
-              <div className="p-8 text-center text-slate-400">No tasks found</div>
-            )}
+                        <div className="flex items-start gap-2">
+                          <GripVertical size={14} className="text-slate-500 mt-1 flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className={`font-medium text-sm ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                              {task.title}
+                            </p>
+                            {task.description && (
+                              <p className="text-xs text-slate-400 mt-1 line-clamp-2">
+                                {task.description}
+                              </p>
+                            )}
+                            <div className="flex items-center gap-2 mt-2 text-xs text-slate-500">
+                              <Clock size={12} />
+                              <span>{new Date(task.createdAt).toLocaleDateString()}</span>
+                            </div>
+                            {task.assignedTo && (
+                              <div className={`mt-2 inline-flex items-center px-2 py-0.5 rounded text-xs ${
+                                isDark ? 'bg-slate-700 text-slate-300' : 'bg-slate-100 text-slate-600'
+                              }`}>
+                                {task.assignedTo}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    
+                    {columnTasks.length === 0 && (
+                      <div className={`text-center py-8 text-sm ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+                        No tasks
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </main>
@@ -178,7 +199,9 @@ export default function Tasks() {
           <div className={`rounded-xl border p-6 w-full max-w-md ${
             isDark ? 'bg-surface-dark border-slate-800' : 'bg-white border-slate-200'
           }`}>
-            <h2 className={`text-xl font-semibold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>Create New Task</h2>
+            <h2 className={`text-xl font-semibold mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+              Create New Task
+            </h2>
             <form onSubmit={handleCreateTask}>
               <div className="space-y-4">
                 <div>
@@ -225,21 +248,5 @@ export default function Tasks() {
         </div>
       )}
     </div>
-  );
-}
-
-function StatusBadge({ status }) {
-  const styles = {
-    queued: 'bg-slate-500/20 text-slate-400',
-    active: 'bg-accent-cyan/20 text-accent-cyan',
-    blocked: 'bg-accent-amber/20 text-accent-amber',
-    completed: 'bg-accent-green/20 text-accent-green',
-    failed: 'bg-accent-red/20 text-accent-red',
-  };
-
-  return (
-    <span className={`px-2 py-1 rounded-full text-xs font-medium ${styles[status] || styles.queued}`}>
-      {status}
-    </span>
   );
 }

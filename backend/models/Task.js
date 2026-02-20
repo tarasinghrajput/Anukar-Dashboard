@@ -17,6 +17,28 @@ const taskSchema = new mongoose.Schema({
   parentTaskId: { type: mongoose.Schema.Types.ObjectId, ref: 'Task' },
   dependencyIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Task' }],
   logs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Log' }],
+  // Metadata for external data sources (GitHub, Google Sheets, etc.)
+  metadata: {
+    source: { type: String, enum: ['github', 'sheet', 'manual'], default: 'manual' },
+    // GitHub specific
+    githubIssueNumber: { type: Number },
+    githubUrl: { type: String },
+    // Google Sheet specific
+    sheetTaskId: { type: String },
+    reporter: { type: String },
+    taskType: { type: String },
+    // Common fields
+    priority: { type: String, enum: ['P0', 'P1', 'P2', 'P3'], default: 'P2' },
+    tookHelpFromRoshan: { type: String }
+  },
+  // Progress tracking
+  progressUpdates: [{
+    text: { type: String },
+    time: { type: Date, default: Date.now }
+  }],
+  result: { type: String },
+  blockedReason: { type: String },
+  error: { type: String },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });
