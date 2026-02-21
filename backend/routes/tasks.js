@@ -40,6 +40,36 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// GET /api/tasks/:id/result - Get full task result with file content
+router.get('/:id/result', async (req, res) => {
+  try {
+    const task = await Task.findById(req.params.id);
+    if (!task) {
+      return res.status(404).json({ error: 'Task not found' });
+    }
+
+    const response = task.toObject();
+
+    // If task has an output file, read its content
+    if (task.outputFile) {
+      try {
+        const fs = require('fs').promises;
+        const path = require('path');
+        const filePath = path.join('/home/aptest/.openclaw/workspace', task.outputFile);
+        const content = await fs.readFile(filePath, 'utf-8');
+        response.fullResult = content;
+      } catch (fileError) {
+        response.fullResult = null;
+        response.fileError = 'Output file not found';
+      }
+    }
+
+    res.json(response);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Create task
 router.post('/', async (req, res) => {
   try {

@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
 import Tasks from './pages/Tasks';
+import TaskDetail from './pages/TaskDetail';
 import Agents from './pages/Agents';
 import Logs from './pages/Logs';
 import Documents from './pages/Documents';
@@ -15,6 +16,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/tasks" element={<Tasks />} />
+        <Route path="/tasks/:id" element={<TaskDetail />} />
         <Route path="/agents" element={<Agents />} />
         <Route path="/logs" element={<Logs />} />
         <Route path="/documents" element={<Documents />} />

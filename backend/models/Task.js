@@ -61,6 +61,11 @@ const taskSchema = new mongoose.Schema({
   result: { type: String },
   blockedReason: { type: String },
   error: { type: String },
+  // Task output fields
+  outputFile: { type: String, default: null },
+  outputType: { type: String, enum: ['research', 'draft', 'code', 'log', null], default: null },
+  tokensUsed: { type: Number, default: 0 },
+  agentName: { type: String, default: null },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });

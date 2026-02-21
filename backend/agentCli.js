@@ -43,11 +43,24 @@ async function run() {
       }
       
       case 'complete': {
-        const [agentName, taskId, taskTitle, result] = args;
+        const [agentName, taskId, taskTitle, result, outputFile, outputType] = args;
         const finalResult = await finalizeAgentTask(agentName, taskId, taskTitle, result || 'Task completed', true);
+        
+        // Update task with output file info
+        const mongoose = require('mongoose');
+        await mongoose.connection.db.collection('tasks').updateOne(
+          { _id: new mongoose.Types.ObjectId(taskId) },
+          { $set: { 
+            outputFile: outputFile || null,
+            outputType: outputType || null,
+            agentName: agentName
+          }}
+        );
+        
         console.log(JSON.stringify({
           taskId,
           agentStatus: finalResult.agent.status,
+          outputFile: outputFile || null,
           success: true
         }));
         break;

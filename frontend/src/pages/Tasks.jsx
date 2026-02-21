@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTaskStore, useSocketStore, useThemeStore } from '../store';
 import { useSocketEvents } from '../hooks/useSocketEvents';
 import Sidebar from '../components/Sidebar';
 import ConnectionStatus from '../components/ConnectionStatus';
-import { Plus, GripVertical, Clock, AlertCircle, CheckCircle2, XCircle, Pause, Loader2 } from 'lucide-react';
+import { Plus, GripVertical, Clock, AlertCircle, CheckCircle2, XCircle, Pause, Loader2, Eye } from 'lucide-react';
 
 const COLUMNS = [
   { id: 'queued', label: 'Queued', icon: Pause, color: 'slate' },
@@ -19,6 +20,7 @@ export default function Tasks() {
   const { initTheme, theme } = useThemeStore();
   const [showCreate, setShowCreate] = useState(false);
   const [draggedTask, setDraggedTask] = useState(null);
+  const navigate = useNavigate();
 
   useSocketEvents();
 
@@ -168,13 +170,29 @@ export default function Tasks() {
                               <Clock size={12} />
                               <span>{new Date(task.createdAt).toLocaleDateString()}</span>
                             </div>
-                            {task.assignedTo && (
-                              <div className={`mt-2 inline-flex items-center px-2 py-0.5 rounded text-xs ${
-                                isDark ? 'bg-slate-700 text-slate-300' : 'bg-slate-100 text-slate-600'
-                              }`}>
-                                {task.assignedTo}
-                              </div>
-                            )}
+                            <div className="flex items-center gap-2 mt-3">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`/tasks/${task._id}`);
+                                }}
+                                className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors ${
+                                  isDark 
+                                    ? 'bg-slate-700 hover:bg-slate-600 text-slate-300' 
+                                    : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
+                                }`}
+                              >
+                                <Eye size={12} />
+                                <span>View</span>
+                              </button>
+                              {task.assignedTo && (
+                                <div className={`inline-flex items-center px-2 py-0.5 rounded text-xs ${
+                                  isDark ? 'bg-slate-700 text-slate-300' : 'bg-slate-100 text-slate-600'
+                                }`}>
+                                  {task.assignedTo}
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
