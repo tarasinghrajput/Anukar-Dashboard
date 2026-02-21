@@ -8,6 +8,7 @@ import {
   Network, 
   Activity, 
   BookOpen,
+  Lightbulb,
   Settings 
 } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
@@ -18,6 +19,7 @@ const navItems = [
   { path: '/tasks', label: 'Task Board', icon: FileText },
   { path: '/agents', label: 'Active Agents', icon: Bot },
   { path: '/knowledge', label: 'Knowledge Graph', icon: Network },
+  { path: '/ideas', label: 'Ideas', icon: Lightbulb },
   { path: '/logs', label: 'System Logs', icon: ScrollText },
   { path: '/documents', label: 'Documents', icon: BookOpen },
   { path: '/learnings', label: 'Learnings', icon: Activity },
@@ -62,7 +64,7 @@ export default function Sidebar({ health }) {
           System Control
         </div>
         
-        {navItems.slice(0, 5).map(({ path, label, icon: Icon }) => (
+        {navItems.slice(0, 6).map(({ path, label, icon: Icon }) => (
           <NavLink
             key={path}
             to={path}

@@ -12,6 +12,7 @@ const logsRouter = require('./routes/logs');
 const documentsRouter = require('./routes/documents');
 const learningsRouter = require('./routes/learnings');
 const systemRouter = require('./routes/system');
+const ideasRouter = require('./routes/ideas');
 
 // Import socket handler
 const { initSocket, emitEvent } = require('./socket');
@@ -45,6 +46,7 @@ app.use('/api/logs', logsRouter);
 app.use('/api/documents', documentsRouter);
 app.use('/api/learnings', learningsRouter);
 app.use('/api/system', systemRouter);
+app.use('/api/ideas', ideasRouter);
 
 // Health check
 app.get('/health', (req, res) => {
@@ -66,6 +68,7 @@ app.get('/', (req, res) => {
       logs: '/api/logs',
       documents: '/api/documents',
       learnings: '/api/learnings',
+      ideas: '/api/ideas',
       system: '/api/system',
       health: '/health'
     }

@@ -14,6 +14,28 @@ const taskSchema = new mongoose.Schema({
     default: 'human'
   },
   assignedTo: { type: String },
+  // Agent assignment fields
+  assignedAgent: { 
+    type: String,
+    enum: ['researcher', 'devops', 'comms', null],
+    default: null
+  },
+  agentType: {
+    type: String,
+    default: null
+  },
+  delegationId: {
+    type: String,
+    default: null
+  },
+  startedAt: {
+    type: Date,
+    default: null
+  },
+  completedAt: {
+    type: Date,
+    default: null
+  },
   parentTaskId: { type: mongoose.Schema.Types.ObjectId, ref: 'Task' },
   dependencyIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Task' }],
   logs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Log' }],

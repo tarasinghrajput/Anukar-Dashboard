@@ -6,6 +6,7 @@ import Logs from './pages/Logs';
 import Documents from './pages/Documents';
 import Learnings from './pages/Learnings';
 import KnowledgeGraph from './pages/KnowledgeGraph';
+import Ideas from './pages/Ideas';
 import Settings from './pages/Settings';
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
         <Route path="/logs" element={<Logs />} />
         <Route path="/documents" element={<Documents />} />
         <Route path="/learnings" element={<Learnings />} />
+        <Route path="/ideas" element={<Ideas />} />
         <Route path="/knowledge" element={<KnowledgeGraph />} />
         <Route path="/settings" element={<Settings />} />
       </Routes>
